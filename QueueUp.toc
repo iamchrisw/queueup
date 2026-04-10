@@ -1,0 +1,6 @@
+## Interface: 120001
+## Title: QueueUp
+## Notes: Advanced LFG Applicant management.
+## SavedVariables: QueueUpDB
+
+QueueUp.lua
