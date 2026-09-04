@@ -13,6 +13,8 @@ local SafeCall = util.SafeCall
 local DEFAULTS = const.DEFAULTS
 local PANEL_WIDTH = const.PANEL_WIDTH
 local PANEL_HEIGHT = const.PANEL_HEIGHT
+local ApplyUIFrame = util.ApplyUIFrame
+local SkinUIButton = util.SkinUIButton
 
 local UI = addon.UI
 local BuildLFGTab = priv.ui.BuildLFGTab
@@ -21,6 +23,13 @@ local Debug = priv.debug
 
 local function SelectTab(name)
   addon.activeTab = name
+
+  if addon.tabLFG then
+    SkinUIButton(addon.tabLFG, name == "lfg" and "header" or "elevated")
+  end
+  if addon.tabUtility then
+    SkinUIButton(addon.tabUtility, name == "utility" and "header" or "elevated")
+  end
 
   if addon.lfgTab then
     addon.lfgTab:SetShown(name == "lfg")
@@ -50,6 +59,10 @@ function UI.RefreshGroupOverview()
     return
   end
   local rows = SafeCall(priv.data.GetGroupOverviewRows) or {}
+  if addon.groupOverviewPanel then
+    local contentHeight = 72 + (math.max(1, #rows) * 22)
+    addon.groupOverviewPanel:SetHeight(math.min(PANEL_HEIGHT, contentHeight))
+  end
   for i = 1, #addon.groupOverviewRows do
     local row = addon.groupOverviewRows[i]
     local data = rows[i]
@@ -85,7 +98,7 @@ local function EnsurePanel()
     return addon.panel
   end
 
-  local panel = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
+  local panel = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
   panel:SetSize(PANEL_WIDTH, PANEL_HEIGHT)
   panel:SetPoint("CENTER")
   panel:SetFrameStrata("DIALOG")
@@ -97,18 +110,40 @@ local function EnsurePanel()
   panel:SetScript("OnDragStop", panel.StopMovingOrSizing)
   panel:Hide()
 
+  ApplyUIFrame(panel, "window", 1)
+  panel.TitleText = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   panel.TitleText:SetText("QueueUp")
-  panel.TitleText:SetTextColor(0.95, 0.82, 0.3)
+  panel.TitleText:SetTextColor(0.92, 0.95, 1)
+  panel.TitleText:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -10)
+  local titleRule = panel:CreateTexture(nil, "ARTWORK")
+  titleRule:SetColorTexture(0.28, 0.70, 0.82, 0.85)
+  titleRule:SetPoint("TOPLEFT", panel, "TOPLEFT", 10, -30)
+  titleRule:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -10, -30)
+  titleRule:SetHeight(1)
 
-  local tabLFG = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-  tabLFG:SetSize(104, 22)
-  tabLFG:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -28)
+  local close = CreateFrame("Button", nil, panel, "BackdropTemplate")
+  close:SetSize(22, 22)
+  close:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -8, -6)
+  ApplyUIFrame(close, "elevated", 1)
+  close.label = close:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  close.label:SetPoint("CENTER", 0, 1)
+  close.label:SetText("×")
+  close.label:SetTextColor(0.78, 0.80, 0.84)
+  close:SetScript("OnClick", function() panel:Hide() end)
+  close:SetScript("OnEnter", function(self) self.label:SetTextColor(1, 0.35, 0.35) end)
+  close:SetScript("OnLeave", function(self) self.label:SetTextColor(0.78, 0.80, 0.84) end)
+
+  local tabLFG = CreateFrame("Button", nil, panel, "BackdropTemplate")
+  tabLFG:SetSize(92, 22)
+  tabLFG:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -36)
   tabLFG:SetText("LFG Tools")
+  SkinUIButton(tabLFG, "elevated")
 
-  local tabUtility = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-  tabUtility:SetSize(86, 22)
+  local tabUtility = CreateFrame("Button", nil, panel, "BackdropTemplate")
+  tabUtility:SetSize(72, 22)
   tabUtility:SetPoint("LEFT", tabLFG, "RIGHT", 6, 0)
   tabUtility:SetText("Utility")
+  SkinUIButton(tabUtility, "elevated")
 
   SafeCall(BuildLFGTab, panel)
   SafeCall(BuildUtilityTab, panel)
@@ -141,28 +176,30 @@ local function EnsurePanel()
   addon.tabLFG = tabLFG
   addon.tabUtility = tabUtility
 
-  local side = CreateFrame("Frame", nil, UIParent, "BasicFrameTemplateWithInset")
-  side:SetSize(300, PANEL_HEIGHT)
-  side:SetPoint("TOPLEFT", panel, "TOPRIGHT", 4, 0)
+  local side = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+  side:SetSize(260, PANEL_HEIGHT)
+  side:SetPoint("TOPLEFT", panel, "TOPRIGHT", 8, 0)
   side:SetFrameStrata("DIALOG")
   side:SetFrameLevel(200)
   side:EnableMouse(true)
   side:SetToplevel(true)
   side:Hide()
-  if side.TitleText then
-    side.TitleText:SetText("Group Overview")
-    side.TitleText:SetTextColor(0.95, 0.82, 0.3)
-  end
-  if side.Inset then
-    side.Inset:SetPoint("TOPLEFT", 8, -52)
-    side.Inset:SetPoint("BOTTOMRIGHT", -6, 6)
-    side.Inset:EnableMouse(true)
-  end
+  ApplyUIFrame(side, "window", 1)
+  side.TitleText = side:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  side.TitleText:SetText("Group Overview")
+  side.TitleText:SetTextColor(0.92, 0.95, 1)
+  side.TitleText:SetPoint("TOPLEFT", side, "TOPLEFT", 12, -10)
+  local sideRule = side:CreateTexture(nil, "ARTWORK")
+  sideRule:SetColorTexture(0.28, 0.70, 0.82, 0.85)
+  sideRule:SetPoint("TOPLEFT", side, "TOPLEFT", 10, -30)
+  sideRule:SetPoint("TOPRIGHT", side, "TOPRIGHT", -10, -30)
+  sideRule:SetHeight(1)
 
-  local recheckBtn = CreateFrame("Button", nil, side, "UIPanelButtonTemplate")
-  recheckBtn:SetSize(72, 20)
-  recheckBtn:SetPoint("TOPRIGHT", side, "TOPRIGHT", -30, -28)
+  local recheckBtn = CreateFrame("Button", nil, side, "BackdropTemplate")
+  recheckBtn:SetSize(68, 20)
+  recheckBtn:SetPoint("TOPRIGHT", side, "TOPRIGHT", -10, -36)
   recheckBtn:SetText("Re-check")
+  SkinUIButton(recheckBtn, "elevated")
   recheckBtn:SetScript("OnClick", function()
     if priv.data.ClearGroupOverviewCache then
       priv.data.ClearGroupOverviewCache()
@@ -178,19 +215,19 @@ local function EnsurePanel()
   addon.groupOverviewRows = {}
   for i = 1, 30 do
     local row = CreateFrame("Frame", nil, side)
-    row:SetSize(268, 20)
-    row:SetPoint("TOPLEFT", side, "TOPLEFT", 14, -58 - ((i - 1) * 21))
+    row:SetSize(236, 20)
+    row:SetPoint("TOPLEFT", side, "TOPLEFT", 12, -64 - ((i - 1) * 22))
     row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     row.name:SetPoint("LEFT", row, "LEFT", 0, 0)
-    row.name:SetWidth(150)
+    row.name:SetWidth(132)
     row.name:SetJustifyH("LEFT")
     row.status = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     row.status:SetPoint("LEFT", row.name, "RIGHT", 2, 0)
-    row.status:SetWidth(60)
+    row.status:SetWidth(66)
     row.status:SetJustifyH("LEFT")
     row.role = row:CreateTexture(nil, "ARTWORK")
     row.role:SetSize(16, 16)
-    row.role:SetPoint("RIGHT", row, "RIGHT", -22, 0)
+    row.role:SetPoint("RIGHT", row, "RIGHT", -20, 0)
     row.spec = row:CreateTexture(nil, "ARTWORK")
     row.spec:SetSize(16, 16)
     row.spec:SetPoint("RIGHT", row, "RIGHT", -2, 0)
@@ -259,7 +296,7 @@ local function TogglePanel()
 end
 
 local function CreateLauncherButton(parent, name, tooltipText)
-  local button = CreateFrame("Button", name, parent, "UIPanelButtonTemplate")
+  local button = CreateFrame("Button", name, parent, "BackdropTemplate")
   button:SetSize(96, 24)
   button:RegisterForClicks("LeftButtonUp")
   button:SetFrameStrata("TOOLTIP")
@@ -268,6 +305,7 @@ local function CreateLauncherButton(parent, name, tooltipText)
   button:SetIgnoreParentAlpha(true)
   button:SetIgnoreParentScale(true)
   button:SetText("QueueUp")
+  SkinUIButton(button, "elevated")
 
   button:SetScript("OnClick", TogglePanel)
   button:SetScript("OnEnter", function(self)

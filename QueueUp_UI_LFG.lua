@@ -12,6 +12,8 @@ local GetRatingColor = util.GetRatingColor
 local PANEL_WIDTH = const.PANEL_WIDTH
 local ROLE_ORDER = const.ROLE_ORDER
 local ROLE_LABELS = const.ROLE_LABELS
+local UI_COLORS = const.UI.colors
+local UI_COLUMNS = const.UI_COLUMNS
 
 local UI = addon.UI
 local ApplicantData = addon.ApplicantData
@@ -56,29 +58,30 @@ local function RefreshStandbyBars()
 end
 
 local function MakeHeaderButton(parent, text, width, x, y, key)
-  local btn = CreateFrame("Button", nil, parent)
+  local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
   btn:SetSize(width, 24)
   btn:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
+  util.ApplyUIFrame(btn, "header", 1)
 
   local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetPoint("CENTER")
   label:SetText(text)
-  label:SetTextColor(0.96, 0.83, 0.34)
+  label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
   btn.label = label
 
   local hl = btn:CreateTexture(nil, "HIGHLIGHT")
   hl:SetAllPoints()
-  hl:SetColorTexture(0.35, 0.2, 0.08, 0.35)
+  hl:SetColorTexture(0.28, 0.70, 0.82, 0.12)
 
   if key then
     btn:SetScript("OnEnter", function(self)
       if self.label then
-        self.label:SetTextColor(1, 0.9, 0.5)
+        self.label:SetTextColor(UI_COLORS.warning[1], UI_COLORS.warning[2], UI_COLORS.warning[3])
       end
     end)
     btn:SetScript("OnLeave", function(self)
       if self.label then
-        self.label:SetTextColor(0.96, 0.83, 0.34)
+        self.label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
       end
     end)
     btn:SetScript("OnClick", function()
@@ -107,18 +110,11 @@ local function CreateDataRow(parent, index, layout)
   row._container = parent
   row:SetSize(layout.width, layout.height)
   row:SetPoint("TOPLEFT", parent, "TOPLEFT", layout.left, layout.top - ((index - 1) * (layout.height + layout.gap)))
-  row:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 10,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  row:SetBackdropColor(0.05, 0.05, 0.06, 0.9)
-  row:SetBackdropBorderColor(0.24, 0.24, 0.24, 0.9)
+  util.ApplyUIFrame(row, "surface", 1)
 
   local bg = row:CreateTexture(nil, "BACKGROUND")
   bg:SetAllPoints()
-  local baseAlpha = (index % 2 == 0) and 0.28 or 0.18
+  local baseAlpha = (index % 2 == 0) and 0.18 or 0.08
   bg:SetColorTexture(0.09, 0.09, 0.1, baseAlpha)
   row.baseAlpha = baseAlpha
   row.bg = bg
@@ -126,8 +122,8 @@ local function CreateDataRow(parent, index, layout)
   local leftAccent = row:CreateTexture(nil, "BORDER")
   leftAccent:SetPoint("TOPLEFT", row, "TOPLEFT", 2, -2)
   leftAccent:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 2, 2)
-  leftAccent:SetWidth(3)
-  leftAccent:SetColorTexture(0.78, 0.66, 0.3, 0.8)
+  leftAccent:SetWidth(2)
+  leftAccent:SetColorTexture(0.28, 0.70, 0.82, 0.8)
   row.leftAccent = leftAccent
 
   local groupConnector = row:CreateTexture(nil, "BORDER")
@@ -144,8 +140,8 @@ local function CreateDataRow(parent, index, layout)
   hover:Hide()
   row.hover = hover
 
-  row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-  row.name:SetPoint("LEFT", row, "LEFT", 12, 0)
+  row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  row.name:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.name, 0)
   row.name:SetWidth(220)
   row.name:SetJustifyH("LEFT")
 
@@ -164,29 +160,29 @@ local function CreateDataRow(parent, index, layout)
   }
   for i = 1, 10 do
     local square = row:CreateTexture(nil, "ARTWORK")
-    square:SetSize(7, 10)
-    square:SetPoint("LEFT", row, "LEFT", 260 + ((i - 1) * 8), 0)
+    square:SetSize(6, 10)
+    square:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.fit + ((i - 1) * 7), 0)
     square:SetColorTexture(squareColors[i][1], squareColors[i][2], squareColors[i][3], 0.96)
     row.fitSquares[i] = square
   end
 
   row.rating = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  row.rating:SetPoint("LEFT", row, "LEFT", 336, 0)
+  row.rating:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.rating, 0)
   row.rating:SetWidth(64)
   row.rating:SetJustifyH("CENTER")
 
   row.best = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  row.best:SetPoint("LEFT", row, "LEFT", 404, 0)
+  row.best:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.best, 0)
   row.best:SetWidth(44)
   row.best:SetJustifyH("CENTER")
 
   row.ilvl = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  row.ilvl:SetPoint("LEFT", row, "LEFT", 452, 0)
+  row.ilvl:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.ilvl, 0)
   row.ilvl:SetWidth(52)
   row.ilvl:SetJustifyH("CENTER")
 
   row.role = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  row.role:SetPoint("LEFT", row, "LEFT", 508, 0)
+  row.role:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.role, 0)
   row.role:SetWidth(104)
   row.role:SetJustifyH("CENTER")
 
@@ -256,19 +252,21 @@ local function CreateDataRow(parent, index, layout)
 
   row.score = nil
 
-  row.decline = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+  row.decline = CreateFrame("Button", nil, row, "BackdropTemplate")
   row.decline:SetSize(24, 22)
-  row.decline:SetPoint("LEFT", row, "LEFT", 788, 0)
+  row.decline:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.actions, 0)
   row.decline:SetText("")
+  util.SkinUIButton(row.decline, "elevated")
   row.decline.icon = row.decline:CreateTexture(nil, "ARTWORK")
   row.decline.icon:SetSize(14, 14)
   row.decline.icon:SetPoint("CENTER")
   row.decline.icon:SetTexture("Interface\\RaidFrame\\ReadyCheck-NotReady")
 
-  row.invite = CreateFrame("Button", nil, row, "UIPanelButtonTemplate")
+  row.invite = CreateFrame("Button", nil, row, "BackdropTemplate")
   row.invite:SetSize(24, 22)
   row.invite:SetPoint("RIGHT", row.decline, "LEFT", -4, 0)
   row.invite:SetText("")
+  util.SkinUIButton(row.invite, "elevated")
   row.invite.icon = row.invite:CreateTexture(nil, "ARTWORK")
   row.invite.icon:SetSize(14, 14)
   row.invite.icon:SetPoint("CENTER")
@@ -810,8 +808,8 @@ local function BuildLFGTab(parent)
     left = 10,
     top = -42,
     width = sectionWidth - 20,
-    height = 30,
-    gap = 4,
+    height = 24,
+    gap = 2,
   }
 
   local topBar = CreateFrame("Frame", nil, tab)
@@ -894,40 +892,26 @@ local function BuildLFGTab(parent)
   local listPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   listPanel:SetPoint("TOPLEFT", topBar, "BOTTOMLEFT", 0, -6)
   listPanel:SetPoint("TOPRIGHT", topBar, "BOTTOMRIGHT", 0, -6)
-  listPanel:SetHeight(368)
-  listPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  listPanel:SetBackdropColor(0.02, 0.02, 0.02, 0.55)
-  listPanel:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.8)
+  listPanel:SetHeight(430)
+  util.ApplyUIFrame(listPanel, "surface", 1)
   addon.lfgListPanel = listPanel
 
   local headerStrip = CreateFrame("Frame", nil, listPanel, "BackdropTemplate")
   headerStrip:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 8, -8)
   headerStrip:SetPoint("TOPRIGHT", listPanel, "TOPRIGHT", -8, -8)
-  headerStrip:SetHeight(26)
-  headerStrip:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 10,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  headerStrip:SetBackdropColor(0.2, 0.1, 0.05, 0.8)
-  headerStrip:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.85)
+  headerStrip:SetHeight(22)
+  util.ApplyUIFrame(headerStrip, "header", 1)
 
-  MakeHeaderButton(headerStrip, "Name", 220, 14, -1, "name")
-  MakeHeaderButton(headerStrip, "Fit", 86, 250, -1, "score")
-  MakeHeaderButton(headerStrip, "Rating", 64, 338, -1, "rating")
-  addon.bestHeaderButton = MakeHeaderButton(headerStrip, "Best", 72, 390, -1, nil)
-  MakeHeaderButton(headerStrip, "iLvl", 52, 452, -1, "ilvl")
-  MakeHeaderButton(headerStrip, "Role / Spec", 182, 508, -1, nil)
-  MakeHeaderButton(headerStrip, "Actions", 116, 714, -1, nil)
+  MakeHeaderButton(headerStrip, "Name", 220, UI_COLUMNS.name + 2, -1, "name")
+  MakeHeaderButton(headerStrip, "Fit", 86, UI_COLUMNS.fit - 10, -1, "score")
+  MakeHeaderButton(headerStrip, "Rating", 64, UI_COLUMNS.rating - 2, -1, "rating")
+  addon.bestHeaderButton = MakeHeaderButton(headerStrip, "Best", 72, UI_COLUMNS.best - 14, -1, nil)
+  MakeHeaderButton(headerStrip, "iLvl", 52, UI_COLUMNS.ilvl, -1, "ilvl")
+  MakeHeaderButton(headerStrip, "Role / Spec", 182, UI_COLUMNS.role, -1, nil)
+  MakeHeaderButton(headerStrip, "Actions", 116, UI_COLUMNS.actions - 2, -1, nil)
 
   local scrollContainer = CreateFrame("Frame", nil, listPanel)
-  scrollContainer:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 10, -38)
+  scrollContainer:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 10, -34)
   scrollContainer:SetPoint("BOTTOMRIGHT", listPanel, "BOTTOMRIGHT", -26, 8)
   scrollContainer:SetClipsChildren(true)
 
@@ -955,22 +939,15 @@ local function BuildLFGTab(parent)
   rowLayout.width = 834
 
   addon.rows = {}
-  for i = 1, 9 do
+  for i = 1, 16 do
     addon.rows[i] = CreateDataRow(scrollContainer, i, rowLayout)
   end
 
   local standbyPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   standbyPanel:SetPoint("TOPLEFT", topBar, "BOTTOMLEFT", 0, -6)
   standbyPanel:SetPoint("TOPRIGHT", topBar, "BOTTOMRIGHT", 0, -6)
-  standbyPanel:SetHeight(368)
-  standbyPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  standbyPanel:SetBackdropColor(0.02, 0.02, 0.02, 0.55)
-  standbyPanel:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.8)
+  standbyPanel:SetHeight(430)
+  util.ApplyUIFrame(standbyPanel, "surface", 1)
   standbyPanel:Hide()
 
   local standbyTitle = standbyPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -990,15 +967,8 @@ local function BuildLFGTab(parent)
   local rulesPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   rulesPanel:SetPoint("TOPLEFT", listPanel, "BOTTOMLEFT", 0, -10)
   rulesPanel:SetPoint("TOPRIGHT", listPanel, "BOTTOMRIGHT", 0, -10)
-  rulesPanel:SetHeight(192)
-  rulesPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  rulesPanel:SetBackdropColor(0.02, 0.02, 0.02, 0.55)
-  rulesPanel:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.8)
+  rulesPanel:SetHeight(150)
+  util.ApplyUIFrame(rulesPanel, "surface", 1)
 
   local scoringPane = CreateFrame("Frame", nil, rulesPanel)
   scoringPane:SetPoint("TOPLEFT", rulesPanel, "TOPLEFT", 10, -10)
@@ -1035,6 +1005,7 @@ local function BuildLFGTab(parent)
 
   local ratingBox = CreateFrame("EditBox", nil, scoringPane, "InputBoxTemplate")
   ratingBox:SetSize(56, 22)
+  util.SkinUIEditBox(ratingBox)
   ratingBox:SetPoint("LEFT", ratingLabel, "RIGHT", 8, 0)
   ratingBox:SetAutoFocus(false)
   ratingBox:SetNumeric(true)
@@ -1052,6 +1023,7 @@ local function BuildLFGTab(parent)
 
   local ilvlBox = CreateFrame("EditBox", nil, scoringPane, "InputBoxTemplate")
   ilvlBox:SetSize(56, 22)
+  util.SkinUIEditBox(ilvlBox)
   ilvlBox:SetPoint("LEFT", ilvlLabel, "RIGHT", 8, 0)
   ilvlBox:SetAutoFocus(false)
   ilvlBox:SetNumeric(true)
@@ -1086,6 +1058,7 @@ local function BuildLFGTab(parent)
   end
 
   local roleCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  roleCheck:SetSize(18, 18)
   roleCheck:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -54)
   AttachCheckLabel(scoringPane, roleCheck, "Role contributes to score?")
   roleCheck:SetChecked(state.DB.rules.enableFlags.useRole)
@@ -1096,6 +1069,7 @@ local function BuildLFGTab(parent)
   AttachTooltip(roleCheck, "Use Role Match", "When enabled, a role that is needed contributes to the players score.")
 
   local ratingCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  ratingCheck:SetSize(18, 18)
   ratingCheck:SetPoint("LEFT", roleCheck, "RIGHT", 150, 0)
   AttachCheckLabel(scoringPane, ratingCheck, "Rating contributes to score?")
   ratingCheck:SetChecked(state.DB.rules.enableFlags.useRating)
@@ -1106,6 +1080,7 @@ local function BuildLFGTab(parent)
   AttachTooltip(ratingCheck, "Use Rating", "When enabled, the players rating contributes to score.")
 
   local ilvlCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  ilvlCheck:SetSize(18, 18)
   ilvlCheck:SetPoint("LEFT", ratingCheck, "RIGHT", 150, 0)
   AttachCheckLabel(scoringPane, ilvlCheck, "Item level contributes to score?")
   ilvlCheck:SetChecked(state.DB.rules.enableFlags.useIlvl)
@@ -1120,6 +1095,7 @@ local function BuildLFGTab(parent)
   needRolesLabel:SetText("Needed roles:")
 
   local needTankCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  needTankCheck:SetSize(18, 18)
   needTankCheck:SetPoint("TOPLEFT", needRolesLabel, "BOTTOMLEFT", 0, -2)
   AttachCheckLabel(scoringPane, needTankCheck, "Tank")
   needTankCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.TANK) and true or false)
@@ -1131,6 +1107,7 @@ local function BuildLFGTab(parent)
   AttachTooltip(needTankCheck, "Need Tank", "Applicants offering Tank role are considered role matches.")
 
   local needHealerCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  needHealerCheck:SetSize(18, 18)
   needHealerCheck:SetPoint("LEFT", needTankCheck, "RIGHT", 100, 0)
   AttachCheckLabel(scoringPane, needHealerCheck, "Healer")
   needHealerCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.HEALER) and true or false)
@@ -1142,6 +1119,7 @@ local function BuildLFGTab(parent)
   AttachTooltip(needHealerCheck, "Need Healer", "Applicants offering Healer role are considered role matches.")
 
   local needDamageCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
+  needDamageCheck:SetSize(18, 18)
   needDamageCheck:SetPoint("LEFT", needHealerCheck, "RIGHT", 100, 0)
   AttachCheckLabel(scoringPane, needDamageCheck, "Damage")
   needDamageCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.DAMAGER) and true or false)

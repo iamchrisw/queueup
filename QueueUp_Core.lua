@@ -99,6 +99,87 @@ local function SafeCall(fn, ...)
   return a, b, c, d, e, f, g, h, i, j, k, l
 end
 
+-- QueueUp UI tokens. Feature files should use these helpers instead of choosing
+-- ad-hoc colours, fonts, and chrome for each screen.
+const.UI = {
+  spacing = { xs = 4, sm = 8, md = 12 },
+  rowHeight = 24,
+  headerHeight = 22,
+  colors = {
+    window = { 0.008, 0.009, 0.012, 0.98 },
+    surface = { 0.018, 0.020, 0.026, 0.98 },
+    elevated = { 0.030, 0.034, 0.043, 0.98 },
+    header = { 0.040, 0.044, 0.054, 1 },
+    border = { 0.15, 0.17, 0.21, 0.9 },
+    accent = { 0.28, 0.70, 0.82, 1 },
+    text = { 0.92, 0.93, 0.95, 1 },
+    muted = { 0.55, 0.58, 0.63, 1 },
+    warning = { 1.0, 0.72, 0.18, 1 },
+    danger = { 0.92, 0.25, 0.25, 1 },
+    success = { 0.30, 0.82, 0.46, 1 },
+  },
+}
+const.UI_COLUMNS = {
+  name = 12,
+  fit = 260,
+  rating = 336,
+  best = 404,
+  ilvl = 452,
+  role = 508,
+  actions = 788,
+}
+
+local function ApplyUIFrame(frame, kind, edgeSize)
+  if not frame or type(frame.SetBackdrop) ~= "function" then
+    return
+  end
+  local colors = const.UI.colors
+  local c = colors[kind or "surface"] or colors.surface
+  frame:SetBackdrop({
+    bgFile = "Interface\\Buttons\\WHITE8x8",
+    edgeFile = "Interface\\Buttons\\WHITE8x8",
+    edgeSize = edgeSize or 1,
+    insets = { left = 1, right = 1, top = 1, bottom = 1 },
+  })
+  frame:SetBackdropColor(c[1], c[2], c[3], c[4])
+  local b = colors.border
+  frame:SetBackdropBorderColor(b[1], b[2], b[3], b[4])
+end
+
+local function SkinUIButton(button, kind)
+  if not button then return end
+  ApplyUIFrame(button, kind or "elevated", 1)
+  local normal = button.GetNormalTexture and button:GetNormalTexture()
+  if normal then normal:SetAlpha(0) end
+  local pushed = button.GetPushedTexture and button:GetPushedTexture()
+  if pushed then pushed:SetAlpha(0) end
+  local highlight = button.GetHighlightTexture and button:GetHighlightTexture()
+  if not highlight then
+    highlight = button:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetAllPoints()
+  end
+  local c = const.UI.colors.accent
+  highlight:SetColorTexture(c[1], c[2], c[3], 0.12)
+  local text = button.GetFontString and button:GetFontString()
+  if text then
+    local t = const.UI.colors.text
+    text:SetTextColor(t[1], t[2], t[3])
+  end
+end
+
+local function SkinUIEditBox(box)
+  if not box then return end
+  ApplyUIFrame(box, "elevated", 1)
+  if box.SetTextColor then
+    local t = const.UI.colors.text
+    box:SetTextColor(t[1], t[2], t[3])
+  end
+end
+
+util.ApplyUIFrame = ApplyUIFrame
+util.SkinUIButton = SkinUIButton
+util.SkinUIEditBox = SkinUIEditBox
+
 local RATING_PALETTE = {
   { min = 3800, hex = "ff8000" }, { min = 3645, hex = "f9753f" }, { min = 3525, hex = "f16961" },
   { min = 3405, hex = "e75e7f" }, { min = 3285, hex = "db529c" }, { min = 3165, hex = "cc47b9" },

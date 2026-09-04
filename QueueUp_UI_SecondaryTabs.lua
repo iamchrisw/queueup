@@ -4,6 +4,7 @@ local priv = addon._priv
 local util = priv.util
 local const = priv.const
 local state = priv.state
+local UI_COLORS = const.UI.colors
 
 local Print = util.Print
 local SafeCall = util.SafeCall
@@ -645,19 +646,12 @@ local function BuildMythicTab(parent)
   local contentPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   contentPanel:SetPoint("TOPLEFT", tab, "TOPLEFT", 14, -54)
   contentPanel:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -14, 14)
-  contentPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  contentPanel:SetBackdropColor(0.02, 0.02, 0.02, 0.55)
-  contentPanel:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.8)
+  util.ApplyUIFrame(contentPanel, "surface", 1)
 
   local summaryTitle = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   summaryTitle:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -14)
   summaryTitle:SetText("Current Context")
-  summaryTitle:SetTextColor(0.96, 0.83, 0.34)
+  summaryTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
   local summary = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   summary:SetPoint("TOPLEFT", summaryTitle, "BOTTOMLEFT", 0, -8)
@@ -670,34 +664,38 @@ local function BuildMythicTab(parent)
   local noteTitle = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   noteTitle:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -130)
   noteTitle:SetText("Per-player Notes")
-  noteTitle:SetTextColor(0.96, 0.83, 0.34)
+  noteTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
   local playerKeyBox = CreateFrame("EditBox", nil, tab, "InputBoxTemplate")
   playerKeyBox:SetSize(260, 22)
+  util.SkinUIEditBox(playerKeyBox)
   playerKeyBox:SetPoint("TOPLEFT", noteTitle, "BOTTOMLEFT", 0, -8)
   playerKeyBox:SetAutoFocus(false)
   playerKeyBox:SetText("")
 
   local noteBox = CreateFrame("EditBox", nil, tab, "InputBoxTemplate")
   noteBox:SetSize(580, 22)
+  util.SkinUIEditBox(noteBox)
   noteBox:SetPoint("TOPLEFT", playerKeyBox, "BOTTOMLEFT", 0, -8)
   noteBox:SetAutoFocus(false)
   noteBox:SetText("")
 
-  local loadBtn = CreateFrame("Button", nil, tab, "UIPanelButtonTemplate")
+  local loadBtn = CreateFrame("Button", nil, tab, "BackdropTemplate")
   loadBtn:SetSize(52, 20)
   loadBtn:SetPoint("LEFT", playerKeyBox, "RIGHT", 8, 0)
   loadBtn:SetText("Load")
+  util.SkinUIButton(loadBtn, "elevated")
   loadBtn:SetScript("OnClick", function()
     local key = priv.data.NormalizePlayerKey(playerKeyBox:GetText())
     local note = NotesStore.Get(key) or ""
     noteBox:SetText(note)
   end)
 
-  local saveBtn = CreateFrame("Button", nil, tab, "UIPanelButtonTemplate")
+  local saveBtn = CreateFrame("Button", nil, tab, "BackdropTemplate")
   saveBtn:SetSize(52, 20)
   saveBtn:SetPoint("LEFT", loadBtn, "RIGHT", 6, 0)
   saveBtn:SetText("Save")
+  util.SkinUIButton(saveBtn, "elevated")
   saveBtn:SetScript("OnClick", function()
     local key = priv.data.NormalizePlayerKey(playerKeyBox:GetText())
     if key == "" then
@@ -710,10 +708,11 @@ local function BuildMythicTab(parent)
     UI.RefreshMythicTab()
   end)
 
-  local delBtn = CreateFrame("Button", nil, tab, "UIPanelButtonTemplate")
+  local delBtn = CreateFrame("Button", nil, tab, "BackdropTemplate")
   delBtn:SetSize(60, 20)
   delBtn:SetPoint("LEFT", saveBtn, "RIGHT", 6, 0)
   delBtn:SetText("Delete")
+  util.SkinUIButton(delBtn, "elevated")
   delBtn:SetScript("OnClick", function()
     local key = priv.data.NormalizePlayerKey(playerKeyBox:GetText())
     if key == "" then
@@ -747,19 +746,12 @@ local function BuildUtilityTab(parent)
   local contentPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   contentPanel:SetPoint("TOPLEFT", tab, "TOPLEFT", 14, -54)
   contentPanel:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -14, 14)
-  contentPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 12,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  contentPanel:SetBackdropColor(0.02, 0.02, 0.02, 0.55)
-  contentPanel:SetBackdropBorderColor(0.5, 0.38, 0.18, 0.8)
+  util.ApplyUIFrame(contentPanel, "surface", 1)
 
   local title = contentPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   title:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -14)
   title:SetText("Party Utility")
-  title:SetTextColor(0.96, 0.83, 0.34)
+  title:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
   local subtitle = contentPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
@@ -777,14 +769,7 @@ local function BuildUtilityTab(parent)
   summaryPanel:SetPoint("TOPLEFT", split, "TOPLEFT", 0, 0)
   summaryPanel:SetPoint("BOTTOMLEFT", split, "BOTTOMLEFT", 0, 0)
   summaryPanel:SetWidth(summaryWidth)
-  summaryPanel:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8x8",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 10,
-    insets = { left = 2, right = 2, top = 2, bottom = 2 },
-  })
-  summaryPanel:SetBackdropColor(0.07, 0.07, 0.08, 0.82)
-  summaryPanel:SetBackdropBorderColor(0.35, 0.28, 0.14, 0.72)
+  util.ApplyUIFrame(summaryPanel, "elevated", 1)
 
   local iconsGrid = CreateFrame("Frame", nil, split)
   iconsGrid:SetPoint("TOPLEFT", summaryPanel, "TOPRIGHT", splitGap, 0)
@@ -793,12 +778,12 @@ local function BuildUtilityTab(parent)
   local summaryTitle = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   summaryTitle:SetPoint("TOPLEFT", summaryPanel, "TOPLEFT", 10, -10)
   summaryTitle:SetText("Coverage Summary")
-  summaryTitle:SetTextColor(0.96, 0.83, 0.34)
+  summaryTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
   local criticalTitle = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   criticalTitle:SetPoint("TOPLEFT", summaryTitle, "BOTTOMLEFT", 0, -12)
   criticalTitle:SetText("Critical Utility")
-  criticalTitle:SetTextColor(0.96, 0.83, 0.34)
+  criticalTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
   addon.utilitySummaryCriticalRows = {}
   local previous = criticalTitle
@@ -861,18 +846,11 @@ local function BuildUtilityTab(parent)
       local card = CreateFrame("Frame", nil, iconsGrid, "BackdropTemplate")
       card:SetSize(cardW, cardH)
       card:SetPoint("TOPLEFT", iconsGrid, "TOPLEFT", (colIndex - 1) * (cardW + gapX), -((rowIndex - 1) * (cardH + gapY)))
-      card:SetBackdrop({
-        bgFile = "Interface\\Buttons\\WHITE8x8",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        edgeSize = 10,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
-      })
-      card:SetBackdropColor(0.07, 0.07, 0.08, 0.82)
-      card:SetBackdropBorderColor(0.35, 0.28, 0.14, 0.72)
+      util.ApplyUIFrame(card, "elevated", 1)
 
       card.title = card:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       card.title:SetPoint("TOPLEFT", card, "TOPLEFT", 8, -8)
-      card.title:SetTextColor(0.96, 0.83, 0.34)
+      card.title:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
       card.title:SetJustifyH("LEFT")
       card.title:SetText("")
 
