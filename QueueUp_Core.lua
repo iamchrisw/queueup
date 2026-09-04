@@ -161,6 +161,14 @@ local function SkinUIButton(button, kind)
   local c = const.UI.colors.accent
   highlight:SetColorTexture(c[1], c[2], c[3], 0.12)
   local text = button.GetFontString and button:GetFontString()
+  if not text then
+    text = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    text:SetPoint("CENTER", button, "CENTER", 0, 0)
+    button._queueupText = text
+    if button.GetText then
+      text:SetText(button:GetText() or "")
+    end
+  end
   if text then
     local t = const.UI.colors.text
     text:SetTextColor(t[1], t[2], t[3])

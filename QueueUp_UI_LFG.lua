@@ -822,30 +822,48 @@ local function BuildLFGTab(parent)
   debugLabel:SetPoint("LEFT", topBar, "LEFT", 10, 0)
   debugLabel:SetText("Debug")
   debugLabel:SetTextColor(0.65, 0.65, 0.68)
-  local debugDrop = CreateFrame("Frame", "QueueUpDebugDropdown", topBar, "UIDropDownMenuTemplate")
-  debugDrop:SetPoint("LEFT", debugLabel, "RIGHT", -8, -2)
-  UIDropDownMenu_SetWidth(debugDrop, 118)
-  UIDropDownMenu_SetText(debugDrop, "Simulation")
-  UIDropDownMenu_Initialize(debugDrop, function(self, level)
-    local function AddItem(text, value)
-      local info = UIDropDownMenu_CreateInfo()
-      info.text = text
-      info.func = function()
-        if value == "stop" then
-          if priv.debug and priv.debug.Stop then priv.debug.Stop() end
-          UIDropDownMenu_SetText(debugDrop, "Simulation")
-        else
-          if priv.debug and priv.debug.Start then priv.debug.Start(value) end
-          UIDropDownMenu_SetText(debugDrop, value == "raid" and "Raid (50)" or "Mythic+ (50)")
-        end
-        UI.RefreshApplicants()
-        CloseDropDownMenus()
+  local debugDrop = CreateFrame("Button", "QueueUpDebugDropdown", topBar, "BackdropTemplate")
+  debugDrop:SetSize(132, 22)
+  debugDrop:SetPoint("LEFT", debugLabel, "RIGHT", 8, 0)
+  util.SkinUIButton(debugDrop, "elevated")
+  debugDrop.label = debugDrop:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  debugDrop.label:SetPoint("LEFT", debugDrop, "LEFT", 8, 0)
+  debugDrop.label:SetText("Simulation")
+  debugDrop.label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
+  debugDrop.arrow = debugDrop:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  debugDrop.arrow:SetPoint("RIGHT", debugDrop, "RIGHT", -8, 0)
+  debugDrop.arrow:SetText("▼")
+  debugDrop.arrow:SetTextColor(UI_COLORS.muted[1], UI_COLORS.muted[2], UI_COLORS.muted[3])
+
+  local debugMenu = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+  debugMenu:SetSize(196, 84)
+  debugMenu:SetFrameStrata("TOOLTIP")
+  util.ApplyUIFrame(debugMenu, "elevated", 1)
+  debugMenu:Hide()
+  debugMenu:SetPoint("TOPLEFT", debugDrop, "BOTTOMLEFT", 0, -4)
+  local function AddDebugOption(index, text, value)
+    local option = CreateFrame("Button", nil, debugMenu, "BackdropTemplate")
+    option:SetSize(190, 24)
+    option:SetPoint("TOPLEFT", debugMenu, "TOPLEFT", 3, -3 - ((index - 1) * 26))
+    option:SetText(text)
+    util.SkinUIButton(option, "elevated")
+    option:SetScript("OnClick", function()
+      if value == "stop" then
+        if priv.debug and priv.debug.Stop then priv.debug.Stop() end
+        debugDrop.label:SetText("Simulation")
+      else
+        if priv.debug and priv.debug.Start then priv.debug.Start(value) end
+        debugDrop.label:SetText(value == "raid" and "Raid (50)" or "Mythic+ (50)")
       end
-      UIDropDownMenu_AddButton(info, level)
-    end
-    AddItem("Mythic+ — trickle 50", "dungeon")
-    AddItem("Raid — trickle 50", "raid")
-    AddItem("Stop simulation", "stop")
+      debugMenu:Hide()
+      UI.RefreshApplicants()
+    end)
+  end
+  AddDebugOption(1, "Mythic+ — trickle 50", "dungeon")
+  AddDebugOption(2, "Raid — trickle 50", "raid")
+  AddDebugOption(3, "Stop simulation", "stop")
+  debugDrop:SetScript("OnClick", function()
+    debugMenu:SetShown(not debugMenu:IsShown())
   end)
   addon.debugDropdown = debugDrop
 
