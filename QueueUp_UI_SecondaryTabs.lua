@@ -8,6 +8,7 @@ local UI_COLORS = const.UI.colors
 
 local Print = util.Print
 local SafeCall = util.SafeCall
+local CreateUIFont = util.CreateUIFont
 
 local UI = addon.UI
 local NotesStore = addon.NotesStore
@@ -648,12 +649,12 @@ local function BuildMythicTab(parent)
   contentPanel:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -14, 14)
   util.ApplyUIFrame(contentPanel, "surface", 1)
 
-  local summaryTitle = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  local summaryTitle = CreateUIFont(tab, "OVERLAY", "GameFontHighlight", "body")
   summaryTitle:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -14)
   summaryTitle:SetText("Current Context")
   summaryTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
-  local summary = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local summary = CreateUIFont(tab, "OVERLAY", "GameFontHighlightSmall", "body")
   summary:SetPoint("TOPLEFT", summaryTitle, "BOTTOMLEFT", 0, -8)
   summary:SetWidth(840)
   summary:SetJustifyH("LEFT")
@@ -661,7 +662,7 @@ local function BuildMythicTab(parent)
   summary:SetText("")
   addon.mythicSummary = summary
 
-  local noteTitle = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  local noteTitle = CreateUIFont(tab, "OVERLAY", "GameFontHighlight", "body")
   noteTitle:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -130)
   noteTitle:SetText("Per-player Notes")
   noteTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
@@ -728,11 +729,11 @@ local function BuildMythicTab(parent)
     UI.RefreshMythicTab()
   end)
 
-  local notesLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local notesLabel = CreateUIFont(tab, "OVERLAY", "GameFontHighlightSmall", "body")
   notesLabel:SetPoint("TOPLEFT", noteBox, "BOTTOMLEFT", 0, -12)
   notesLabel:SetText("Saved players")
 
-  local notesList = tab:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local notesList = CreateUIFont(tab, "OVERLAY", "GameFontHighlightSmall", "body")
   notesList:SetPoint("TOPLEFT", notesLabel, "BOTTOMLEFT", 0, -6)
   notesList:SetWidth(840)
   notesList:SetJustifyH("LEFT")
@@ -751,12 +752,12 @@ local function BuildUtilityTab(parent)
   contentPanel:SetPoint("BOTTOMRIGHT", tab, "BOTTOMRIGHT", -14, 14)
   util.ApplyUIFrame(contentPanel, "surface", 1)
 
-  local title = contentPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  local title = CreateUIFont(contentPanel, "OVERLAY", "GameFontHighlight", "body")
   title:SetPoint("TOPLEFT", contentPanel, "TOPLEFT", 12, -14)
   title:SetText("Party Utility")
   title:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
-  local subtitle = contentPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local subtitle = CreateUIFont(contentPanel, "OVERLAY", "GameFontHighlightSmall", "body")
   subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
   subtitle:SetText("Left: coverage summary. Right: grouped utility icons. Dark icon = missing.")
   subtitle:SetTextColor(0.86, 0.86, 0.86)
@@ -778,12 +779,12 @@ local function BuildUtilityTab(parent)
   iconsGrid:SetPoint("TOPLEFT", summaryPanel, "TOPRIGHT", splitGap, 0)
   iconsGrid:SetPoint("BOTTOMRIGHT", split, "BOTTOMRIGHT", 0, 0)
 
-  local summaryTitle = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  local summaryTitle = CreateUIFont(summaryPanel, "OVERLAY", "GameFontHighlight", "body")
   summaryTitle:SetPoint("TOPLEFT", summaryPanel, "TOPLEFT", 10, -10)
   summaryTitle:SetText("Coverage Summary")
   summaryTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
 
-  local criticalTitle = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local criticalTitle = CreateUIFont(summaryPanel, "OVERLAY", "GameFontNormal", "body")
   criticalTitle:SetPoint("TOPLEFT", summaryTitle, "BOTTOMLEFT", 0, -12)
   criticalTitle:SetText("Critical Utility")
   criticalTitle:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
@@ -791,7 +792,7 @@ local function BuildUtilityTab(parent)
   addon.utilitySummaryCriticalRows = {}
   local previous = criticalTitle
   for _, typeName in ipairs(UTILITY_CRITICAL_TYPES) do
-    local line = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    local line = CreateUIFont(summaryPanel, "OVERLAY", "GameFontHighlight", "body")
     line:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -6)
     line:SetWidth(summaryWidth - 20)
     line:SetJustifyH("LEFT")
@@ -801,7 +802,7 @@ local function BuildUtilityTab(parent)
     previous = line
   end
 
-  local otherTitle = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  local otherTitle = CreateUIFont(summaryPanel, "OVERLAY", "GameFontNormal", "body")
   otherTitle:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -14)
   otherTitle:SetText("Other Coverage")
   otherTitle:SetTextColor(0.9, 0.9, 0.9)
@@ -810,7 +811,7 @@ local function BuildUtilityTab(parent)
   previous = otherTitle
   for _, typeName in ipairs(UTILITY_TYPE_ORDER) do
     if not UTILITY_CRITICAL_LOOKUP[typeName] then
-      local line = summaryPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      local line = CreateUIFont(summaryPanel, "OVERLAY", "GameFontHighlightSmall", "body")
       line:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -6)
       line:SetWidth(summaryWidth - 20)
       line:SetJustifyH("LEFT")
@@ -851,7 +852,7 @@ local function BuildUtilityTab(parent)
       card:SetPoint("TOPLEFT", iconsGrid, "TOPLEFT", (colIndex - 1) * (cardW + gapX), -((rowIndex - 1) * (cardH + gapY)))
       util.ApplyUIFrame(card, "elevated", 1)
 
-      card.title = card:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      card.title = CreateUIFont(card, "OVERLAY", "GameFontNormal", "body")
       card.title:SetPoint("TOPLEFT", card, "TOPLEFT", 8, -8)
       card.title:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
       card.title:SetJustifyH("LEFT")

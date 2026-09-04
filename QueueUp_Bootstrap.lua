@@ -16,7 +16,7 @@ local PANEL_HEIGHT = const.PANEL_HEIGHT
 local ApplyUIFrame = util.ApplyUIFrame
 local SkinUIButton = util.SkinUIButton
 local SetUIButtonText = util.SetUIButtonText
-local SkinUIFont = util.SkinUIFont
+local CreateUIFont = util.CreateUIFont
 
 local UI = addon.UI
 local BuildLFGTab = priv.ui.BuildLFGTab
@@ -113,8 +113,7 @@ local function EnsurePanel()
   panel:Hide()
 
   ApplyUIFrame(panel, "window", 1)
-  panel.TitleText = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  SkinUIFont(panel.TitleText, "heading")
+  panel.TitleText = CreateUIFont(panel, "OVERLAY", "GameFontNormalLarge", "heading")
   panel.TitleText:SetText("QueueUp")
   panel.TitleText:SetTextColor(0.92, 0.95, 1)
   panel.TitleText:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -10)
@@ -128,7 +127,7 @@ local function EnsurePanel()
   close:SetSize(22, 22)
   close:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -8, -6)
   ApplyUIFrame(close, "elevated", 1)
-  close.label = close:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  close.label = CreateUIFont(close, "OVERLAY", "GameFontNormal", "body")
   close.label:SetPoint("CENTER", 0, 1)
   close.label:SetText("×")
   close.label:SetTextColor(0.78, 0.80, 0.84)
@@ -190,8 +189,7 @@ local function EnsurePanel()
   side:SetToplevel(true)
   side:Hide()
   ApplyUIFrame(side, "window", 1)
-  side.TitleText = side:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  SkinUIFont(side.TitleText, "heading")
+  side.TitleText = CreateUIFont(side, "OVERLAY", "GameFontNormalLarge", "heading")
   side.TitleText:SetText("Group Overview")
   side.TitleText:SetTextColor(0.92, 0.95, 1)
   side.TitleText:SetPoint("TOPLEFT", side, "TOPLEFT", 12, -10)
@@ -224,11 +222,11 @@ local function EnsurePanel()
     local row = CreateFrame("Frame", nil, side)
     row:SetSize(236, 20)
     row:SetPoint("TOPLEFT", side, "TOPLEFT", 12, -64 - ((i - 1) * 22))
-    row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    row.name = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
     row.name:SetPoint("LEFT", row, "LEFT", 0, 0)
     row.name:SetWidth(132)
     row.name:SetJustifyH("LEFT")
-    row.status = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    row.status = CreateUIFont(row, "OVERLAY", "GameFontDisableSmall", "body")
     row.status:SetPoint("LEFT", row.name, "RIGHT", 2, 0)
     row.status:SetWidth(66)
     row.status:SetJustifyH("LEFT")

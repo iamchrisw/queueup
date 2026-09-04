@@ -106,9 +106,12 @@ const.UI = {
   rowHeight = 24,
   headerHeight = 22,
   fonts = {
-    body = "Fonts\\ARIALN.TTF",
-    heading = "Fonts\\FRIZQT__.TTF",
+    -- Keep every QueueUp label on one face.  If an installed media addon has
+    -- Accidental Presidency registered, ResolvePreferredFont() below swaps
+    -- this fallback for that file automatically.
+    primary = "Fonts\\ARIALN.TTF",
   },
+  fontStrings = {},
   colors = {
     window = { 0.008, 0.009, 0.012, 0.98 },
     surface = { 0.018, 0.020, 0.026, 0.98 },
@@ -123,6 +126,23 @@ const.UI = {
     success = { 0.30, 0.82, 0.46, 1 },
   },
 }
+
+local function ResolvePreferredFont()
+  local fallback = "Fonts\\ARIALN.TTF"
+  local libStub = rawget(_G, "LibStub")
+  if type(libStub) == "function" then
+    local ok, media = pcall(libStub, "LibSharedMedia-3.0", true)
+    if ok and media and type(media.Fetch) == "function" then
+      local fetchedOK, fetched = pcall(media.Fetch, media, "font", "Accidental Presidency", true)
+      if fetchedOK and type(fetched) == "string" and fetched ~= "" then
+        return fetched
+      end
+    end
+  end
+  return fallback
+end
+
+const.UI.fonts.primary = ResolvePreferredFont()
 const.UI_COLUMNS = {
   name = 12,
   fit = 260,
@@ -150,6 +170,14 @@ local function ApplyUIFrame(frame, kind, edgeSize)
   frame:SetBackdropBorderColor(b[1], b[2], b[3], b[4])
 end
 
+local function TrackUIFont(fontString, role)
+  if not fontString then return end
+  fontString._queueupFontRole = role
+  if fontString._queueupFontTracked then return end
+  fontString._queueupFontTracked = true
+  const.UI.fontStrings[#const.UI.fontStrings + 1] = fontString
+end
+
 local function SkinUIButton(button, kind)
   if not button then return end
   ApplyUIFrame(button, kind or "elevated", 1)
@@ -175,7 +203,8 @@ local function SkinUIButton(button, kind)
   end
   if text then
     local t = const.UI.colors.text
-    text:SetFont(const.UI.fonts.body, 11, "")
+    TrackUIFont(text, "body")
+    text:SetFont(const.UI.fonts.primary, 11, "")
     text:SetTextColor(t[1], t[2], t[3])
   end
 end
@@ -191,22 +220,35 @@ local function SetUIButtonText(button, value)
     end
     button._queueupText = text
   end
+  TrackUIFont(text, "body")
   text:SetText(tostring(value or ""))
-  text:SetFont(const.UI.fonts.body, 11, "")
+  text:SetFont(const.UI.fonts.primary, 11, "")
   local c = const.UI.colors.text
   text:SetTextColor(c[1], c[2], c[3])
 end
 
 local function SkinUIFont(fontString, role)
   if not fontString or not fontString.SetFont then return end
+  TrackUIFont(fontString, role)
   local isHeading = role == "heading"
   local size = isHeading and 13 or 11
-  fontString:SetFont(isHeading and const.UI.fonts.heading or const.UI.fonts.body, size, "")
+  fontString:SetFont(const.UI.fonts.primary, size, "")
+end
+
+local function CreateUIFont(parent, layer, template, role)
+  if not parent or not parent.CreateFontString then return nil end
+  local fontString = parent:CreateFontString(nil, layer or "OVERLAY", template)
+  SkinUIFont(fontString, role)
+  return fontString
 end
 
 local function SkinUIEditBox(box)
   if not box then return end
   ApplyUIFrame(box, "elevated", 1)
+  if box.SetFont then
+    TrackUIFont(box, "body")
+    box:SetFont(const.UI.fonts.primary, 11, "")
+  end
   if box.SetTextColor then
     local t = const.UI.colors.text
     box:SetTextColor(t[1], t[2], t[3])
@@ -217,7 +259,26 @@ util.ApplyUIFrame = ApplyUIFrame
 util.SkinUIButton = SkinUIButton
 util.SetUIButtonText = SetUIButtonText
 util.SkinUIFont = SkinUIFont
+util.CreateUIFont = CreateUIFont
 util.SkinUIEditBox = SkinUIEditBox
+
+-- SharedMedia-based font packs can load after QueueUp.  Re-apply the one
+-- QueueUp face when that happens so a /reload is enough to pick it up.
+local fontEvents = CreateFrame("Frame")
+fontEvents:RegisterEvent("ADDON_LOADED")
+fontEvents:RegisterEvent("PLAYER_LOGIN")
+fontEvents:SetScript("OnEvent", function(self)
+  local preferred = ResolvePreferredFont()
+  if preferred ~= const.UI.fonts.primary then
+    const.UI.fonts.primary = preferred
+    for i = 1, #const.UI.fontStrings do
+      local fontString = const.UI.fontStrings[i]
+      if fontString and fontString.SetFont then
+        SkinUIFont(fontString, fontString._queueupFontRole)
+      end
+    end
+  end
+end)
 
 local RATING_PALETTE = {
   { min = 3800, hex = "ff8000" }, { min = 3645, hex = "f9753f" }, { min = 3525, hex = "f16961" },

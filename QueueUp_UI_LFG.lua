@@ -8,6 +8,7 @@ local state = priv.state
 local Print = util.Print
 local SafeCall = util.SafeCall
 local GetRatingColor = util.GetRatingColor
+local CreateUIFont = util.CreateUIFont
 
 local PANEL_WIDTH = const.PANEL_WIDTH
 local ROLE_ORDER = const.ROLE_ORDER
@@ -63,8 +64,7 @@ local function MakeHeaderButton(parent, text, width, x, y, key)
   btn:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
   util.ApplyUIFrame(btn, "header", 1)
 
-  local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  util.SkinUIFont(label, "body")
+  local label = CreateUIFont(btn, "OVERLAY", "GameFontNormal", "body")
   label:SetPoint("CENTER")
   label:SetText(text)
   label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
@@ -141,8 +141,7 @@ local function CreateDataRow(parent, index, layout)
   hover:Hide()
   row.hover = hover
 
-  row.name = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(row.name, "body")
+  row.name = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.name:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.name, 0)
   row.name:SetWidth(220)
   row.name:SetJustifyH("LEFT")
@@ -168,26 +167,22 @@ local function CreateDataRow(parent, index, layout)
     row.fitSquares[i] = square
   end
 
-  row.rating = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(row.rating, "body")
+  row.rating = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.rating:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.rating, 0)
   row.rating:SetWidth(64)
   row.rating:SetJustifyH("CENTER")
 
-  row.best = row:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  util.SkinUIFont(row.best, "body")
+  row.best = CreateUIFont(row, "OVERLAY", "GameFontDisableSmall", "body")
   row.best:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.best, 0)
   row.best:SetWidth(44)
   row.best:SetJustifyH("CENTER")
 
-  row.ilvl = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(row.ilvl, "body")
+  row.ilvl = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.ilvl:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.ilvl, 0)
   row.ilvl:SetWidth(52)
   row.ilvl:SetJustifyH("CENTER")
 
-  row.role = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(row.role, "body")
+  row.role = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.role:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.role, 0)
   row.role:SetWidth(104)
   row.role:SetJustifyH("CENTER")
@@ -209,8 +204,7 @@ local function CreateDataRow(parent, index, layout)
   row.specIcon:SetPoint("LEFT", row, "LEFT", 530, 0)
   row.specIcon:Hide()
 
-  row.specText = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(row.specText, "body")
+  row.specText = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.specText:SetPoint("LEFT", row, "LEFT", 550, 0)
   row.specText:SetWidth(156)
   row.specText:SetJustifyH("LEFT")
@@ -825,8 +819,7 @@ local function BuildLFGTab(parent)
   topBar:SetHeight(30)
   topBar:SetFrameLevel(tab:GetFrameLevel() + 3)
 
-  local debugLabel = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(debugLabel, "body")
+  local debugLabel = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
   debugLabel:SetPoint("LEFT", topBar, "LEFT", 10, 0)
   debugLabel:SetText("Debug")
   debugLabel:SetTextColor(0.65, 0.65, 0.68)
@@ -834,13 +827,11 @@ local function BuildLFGTab(parent)
   debugDrop:SetSize(132, 22)
   debugDrop:SetPoint("LEFT", debugLabel, "RIGHT", 8, 0)
   util.SkinUIButton(debugDrop, "elevated")
-  debugDrop.label = debugDrop:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(debugDrop.label, "body")
+  debugDrop.label = CreateUIFont(debugDrop, "OVERLAY", "GameFontHighlightSmall", "body")
   debugDrop.label:SetPoint("LEFT", debugDrop, "LEFT", 8, 0)
   debugDrop.label:SetText("Simulation")
   debugDrop.label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
-  debugDrop.arrow = debugDrop:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  util.SkinUIFont(debugDrop.arrow, "body")
+  debugDrop.arrow = CreateUIFont(debugDrop, "OVERLAY", "GameFontHighlightSmall", "body")
   debugDrop.arrow:SetPoint("RIGHT", debugDrop, "RIGHT", -8, 0)
   debugDrop.arrow:SetText("▼")
   debugDrop.arrow:SetTextColor(UI_COLORS.muted[1], UI_COLORS.muted[2], UI_COLORS.muted[3])
@@ -878,7 +869,7 @@ local function BuildLFGTab(parent)
   end)
   addon.debugDropdown = debugDrop
 
-  tab.sortInfo = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  tab.sortInfo = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
   tab.sortInfo:SetPoint("LEFT", topBar, "LEFT", 10, 0)
   tab.sortInfo:SetWidth(175)
   tab.sortInfo:SetJustifyH("LEFT")
@@ -886,7 +877,7 @@ local function BuildLFGTab(parent)
   tab.sortInfo:SetTextColor(0.94, 0.94, 0.94)
   tab.sortInfo:Hide()
 
-  local deserterStatus = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local deserterStatus = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
   deserterStatus:SetPoint("RIGHT", topBar, "RIGHT", -14, 0)
   deserterStatus:SetWidth(148)
   deserterStatus:SetJustifyH("RIGHT")
@@ -895,7 +886,7 @@ local function BuildLFGTab(parent)
   addon.deserterStatusText = deserterStatus
   deserterStatus:Hide()
 
-  local applicantDeserter = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local applicantDeserter = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
   applicantDeserter:SetPoint("RIGHT", deserterStatus, "LEFT", -10, 0)
   applicantDeserter:SetWidth(158)
   applicantDeserter:SetJustifyH("RIGHT")
@@ -904,13 +895,13 @@ local function BuildLFGTab(parent)
   addon.applicantDeserterText = applicantDeserter
   applicantDeserter:Hide()
 
-  tab.applicantCount = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  tab.applicantCount = CreateUIFont(topBar, "OVERLAY", "GameFontHighlight", "body")
   tab.applicantCount:SetPoint("RIGHT", applicantDeserter, "LEFT", -10, 0)
   tab.applicantCount:SetText("Applicants: 0")
   tab.applicantCount:SetTextColor(0.98, 0.86, 0.4)
   addon.applicantCountText = tab.applicantCount
 
-  local listingContext = topBar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local listingContext = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
   listingContext:SetPoint("RIGHT", tab.applicantCount, "LEFT", -18, 0)
   listingContext:SetWidth(260)
   listingContext:SetJustifyH("RIGHT")
@@ -979,12 +970,12 @@ local function BuildLFGTab(parent)
   util.ApplyUIFrame(standbyPanel, "surface", 1)
   standbyPanel:Hide()
 
-  local standbyTitle = standbyPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+  local standbyTitle = CreateUIFont(standbyPanel, "OVERLAY", "GameFontHighlight", "body")
   standbyTitle:SetPoint("TOPLEFT", standbyPanel, "TOPLEFT", 12, -12)
   standbyTitle:SetText("Not Currently Listed")
   standbyTitle:SetTextColor(0.96, 0.83, 0.34)
 
-  local standbyCenterMessage = standbyPanel:CreateFontString(nil, "OVERLAY", "GameFontHighlightLarge")
+  local standbyCenterMessage = CreateUIFont(standbyPanel, "OVERLAY", "GameFontHighlightLarge", "body")
   standbyCenterMessage:SetPoint("CENTER", standbyPanel, "CENTER", 0, 0)
   standbyCenterMessage:SetText("Create a group to see your applicants!")
   standbyCenterMessage:SetTextColor(0.9, 0.9, 0.9)
@@ -1021,14 +1012,14 @@ local function BuildLFGTab(parent)
     end)
   end
 
-  local rulesHelp = scoringPane:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local rulesHelp = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
   rulesHelp:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -2)
   rulesHelp:SetWidth(800)
   rulesHelp:SetJustifyH("LEFT")
   rulesHelp:SetText("How applicants are scored and sorted. Enable the checks you care about, then set role and minimum thresholds.")
   rulesHelp:SetTextColor(0.78, 0.78, 0.78)
 
-  local ratingLabel = scoringPane:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local ratingLabel = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
   ratingLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -26)
   ratingLabel:SetText("Min rating")
 
@@ -1046,7 +1037,7 @@ local function BuildLFGTab(parent)
   end)
   AttachTooltip(ratingBox, "Minimum M+ Rating", "Applicants at or above this value get the minimum-rating bonus.")
 
-  local ilvlLabel = scoringPane:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local ilvlLabel = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
   ilvlLabel:SetPoint("LEFT", ratingBox, "RIGHT", 12, 0)
   ilvlLabel:SetText("Min ilvl")
 
@@ -1080,7 +1071,7 @@ local function BuildLFGTab(parent)
   AttachTooltip(ilvlBox, "Minimum Item Level", "Applicants at or above this value get the item-level bonus.")
 
   local function AttachCheckLabel(parentFrame, check, text)
-    local label = parentFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    local label = CreateUIFont(parentFrame, "OVERLAY", "GameFontHighlightSmall", "body")
     label:SetPoint("LEFT", check, "RIGHT", 2, 1)
     label:SetText(text)
     return label
@@ -1119,7 +1110,7 @@ local function BuildLFGTab(parent)
   end)
   AttachTooltip(ilvlCheck, "Use Item Level", "When enabled, the players item level contributes to score.")
 
-  local needRolesLabel = scoringPane:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  local needRolesLabel = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
   needRolesLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -96)
   needRolesLabel:SetText("Needed roles:")
 
