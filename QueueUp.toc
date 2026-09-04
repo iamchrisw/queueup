@@ -1,6 +1,15 @@
-## Interface: 120001
+## Interface: 120005, 120100
 ## Title: QueueUp
+## Version: 0.2.0
 ## Notes: Advanced LFG Applicant management.
 ## SavedVariables: QueueUpDB
+## OptionalDeps: RaiderIO
 
 QueueUp.lua
+QueueUp_Core.lua
+QueueUp_Data.lua
+QueueUp_Rules.lua
+QueueUp_Debug.lua
+QueueUp_UI_LFG.lua
+QueueUp_UI_SecondaryTabs.lua
+QueueUp_Bootstrap.lua
