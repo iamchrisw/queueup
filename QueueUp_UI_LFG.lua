@@ -58,14 +58,15 @@ local function RefreshStandbyBars()
   end
 end
 
-local function MakeHeaderButton(parent, text, width, x, y, key)
-  local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
-  btn:SetSize(width, 24)
+local function MakeHeaderButton(parent, text, width, x, y, key, centerOffset)
+  -- Headers share one continuous strip.  Individual borders made each label
+  -- look like a floating button and caused the visual columns to drift apart.
+  local btn = CreateFrame("Button", nil, parent)
+  btn:SetSize(width, const.UI.headerHeight)
   btn:SetPoint("TOPLEFT", parent, "TOPLEFT", x, y)
-  util.ApplyUIFrame(btn, "header", 1)
 
   local label = CreateUIFont(btn, "OVERLAY", "GameFontNormal", "body")
-  label:SetPoint("CENTER")
+  label:SetPoint("CENTER", btn, "CENTER", centerOffset or 0, 0)
   label:SetText(text)
   label:SetTextColor(UI_COLORS.text[1], UI_COLORS.text[2], UI_COLORS.text[3])
   btn.label = label
@@ -917,18 +918,19 @@ local function BuildLFGTab(parent)
   addon.lfgListPanel = listPanel
 
   local headerStrip = CreateFrame("Frame", nil, listPanel, "BackdropTemplate")
-  headerStrip:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 8, -8)
-  headerStrip:SetPoint("TOPRIGHT", listPanel, "TOPRIGHT", -8, -8)
-  headerStrip:SetHeight(22)
+  headerStrip:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 10, -8)
+  headerStrip:SetPoint("TOPRIGHT", listPanel, "TOPRIGHT", -26, -8)
+  headerStrip:SetHeight(const.UI.headerHeight)
   util.ApplyUIFrame(headerStrip, "header", 1)
 
-  MakeHeaderButton(headerStrip, "Name", 220, UI_COLUMNS.name + 2, -1, "name")
-  MakeHeaderButton(headerStrip, "Fit", 86, UI_COLUMNS.fit - 10, -1, "score")
-  MakeHeaderButton(headerStrip, "Rating", 64, UI_COLUMNS.rating - 2, -1, "rating")
-  addon.bestHeaderButton = MakeHeaderButton(headerStrip, "Best", 72, UI_COLUMNS.best - 14, -1, nil)
-  MakeHeaderButton(headerStrip, "iLvl", 52, UI_COLUMNS.ilvl, -1, "ilvl")
-  MakeHeaderButton(headerStrip, "Role / Spec", 182, UI_COLUMNS.role, -1, nil)
-  MakeHeaderButton(headerStrip, "Actions", 116, UI_COLUMNS.actions - 2, -1, nil)
+  local actionHeaderX = UI_COLUMNS.actions - 28
+  MakeHeaderButton(headerStrip, "Name", UI_COLUMNS.fit - UI_COLUMNS.name, UI_COLUMNS.name, 0, "name")
+  MakeHeaderButton(headerStrip, "Fit", UI_COLUMNS.rating - UI_COLUMNS.fit, UI_COLUMNS.fit, 0, "score")
+  MakeHeaderButton(headerStrip, "Rating", UI_COLUMNS.best - UI_COLUMNS.rating, UI_COLUMNS.rating, 0, "rating")
+  addon.bestHeaderButton = MakeHeaderButton(headerStrip, "Best", UI_COLUMNS.ilvl - UI_COLUMNS.best, UI_COLUMNS.best, 0, nil)
+  MakeHeaderButton(headerStrip, "iLvl", UI_COLUMNS.role - UI_COLUMNS.ilvl, UI_COLUMNS.ilvl, 0, "ilvl")
+  MakeHeaderButton(headerStrip, "Role / Spec", actionHeaderX - UI_COLUMNS.role, UI_COLUMNS.role, 0, nil, -27)
+  MakeHeaderButton(headerStrip, "Actions", 74, actionHeaderX, 0, nil, -11)
 
   local scrollContainer = CreateFrame("Frame", nil, listPanel)
   scrollContainer:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 10, -34)
