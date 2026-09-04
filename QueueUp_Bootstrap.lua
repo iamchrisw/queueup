@@ -17,6 +17,7 @@ local ApplyUIFrame = util.ApplyUIFrame
 local SkinUIButton = util.SkinUIButton
 local SetUIButtonText = util.SetUIButtonText
 local CreateUIFont = util.CreateUIFont
+local RefreshUIFont = util.RefreshUIFont
 
 local UI = addon.UI
 local BuildLFGTab = priv.ui.BuildLFGTab
@@ -151,6 +152,7 @@ local function EnsurePanel()
 
   SafeCall(BuildLFGTab, panel)
   SafeCall(BuildUtilityTab, panel)
+  SafeCall(RefreshUIFont)
 
   tabLFG:SetScript("OnClick", function()
     SelectTab("lfg")

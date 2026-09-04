@@ -262,22 +262,27 @@ util.SkinUIFont = SkinUIFont
 util.CreateUIFont = CreateUIFont
 util.SkinUIEditBox = SkinUIEditBox
 
+local function RefreshUIFont()
+  local preferred = ResolvePreferredFont()
+  if preferred == const.UI.fonts.primary then return end
+  const.UI.fonts.primary = preferred
+  for i = 1, #const.UI.fontStrings do
+    local fontString = const.UI.fontStrings[i]
+    if fontString and fontString.SetFont then
+      SkinUIFont(fontString, fontString._queueupFontRole)
+    end
+  end
+end
+
+util.RefreshUIFont = RefreshUIFont
+
 -- SharedMedia-based font packs can load after QueueUp.  Re-apply the one
 -- QueueUp face when that happens so a /reload is enough to pick it up.
 local fontEvents = CreateFrame("Frame")
 fontEvents:RegisterEvent("ADDON_LOADED")
 fontEvents:RegisterEvent("PLAYER_LOGIN")
-fontEvents:SetScript("OnEvent", function(self)
-  local preferred = ResolvePreferredFont()
-  if preferred ~= const.UI.fonts.primary then
-    const.UI.fonts.primary = preferred
-    for i = 1, #const.UI.fontStrings do
-      local fontString = const.UI.fontStrings[i]
-      if fontString and fontString.SetFont then
-        SkinUIFont(fontString, fontString._queueupFontRole)
-      end
-    end
-  end
+fontEvents:SetScript("OnEvent", function()
+  RefreshUIFont()
 end)
 
 local RATING_PALETTE = {
