@@ -105,6 +105,10 @@ const.UI = {
   spacing = { xs = 4, sm = 8, md = 12 },
   rowHeight = 24,
   headerHeight = 22,
+  fonts = {
+    body = "Fonts\\ARIALN.TTF",
+    heading = "Fonts\\FRIZQT__.TTF",
+  },
   colors = {
     window = { 0.008, 0.009, 0.012, 0.98 },
     surface = { 0.018, 0.020, 0.026, 0.98 },
@@ -171,8 +175,33 @@ local function SkinUIButton(button, kind)
   end
   if text then
     local t = const.UI.colors.text
+    text:SetFont(const.UI.fonts.body, 11, "")
     text:SetTextColor(t[1], t[2], t[3])
   end
+end
+
+local function SetUIButtonText(button, value)
+  if not button then return end
+  local text = button._queueupText
+  if not text then
+    text = button.GetFontString and button:GetFontString()
+    if not text then
+      text = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      text:SetPoint("CENTER", button, "CENTER", 0, 0)
+    end
+    button._queueupText = text
+  end
+  text:SetText(tostring(value or ""))
+  text:SetFont(const.UI.fonts.body, 11, "")
+  local c = const.UI.colors.text
+  text:SetTextColor(c[1], c[2], c[3])
+end
+
+local function SkinUIFont(fontString, role)
+  if not fontString or not fontString.SetFont then return end
+  local isHeading = role == "heading"
+  local size = isHeading and 13 or 11
+  fontString:SetFont(isHeading and const.UI.fonts.heading or const.UI.fonts.body, size, "")
 end
 
 local function SkinUIEditBox(box)
@@ -186,6 +215,8 @@ end
 
 util.ApplyUIFrame = ApplyUIFrame
 util.SkinUIButton = SkinUIButton
+util.SetUIButtonText = SetUIButtonText
+util.SkinUIFont = SkinUIFont
 util.SkinUIEditBox = SkinUIEditBox
 
 local RATING_PALETTE = {

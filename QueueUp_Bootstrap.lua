@@ -15,6 +15,8 @@ local PANEL_WIDTH = const.PANEL_WIDTH
 local PANEL_HEIGHT = const.PANEL_HEIGHT
 local ApplyUIFrame = util.ApplyUIFrame
 local SkinUIButton = util.SkinUIButton
+local SetUIButtonText = util.SetUIButtonText
+local SkinUIFont = util.SkinUIFont
 
 local UI = addon.UI
 local BuildLFGTab = priv.ui.BuildLFGTab
@@ -112,6 +114,7 @@ local function EnsurePanel()
 
   ApplyUIFrame(panel, "window", 1)
   panel.TitleText = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  SkinUIFont(panel.TitleText, "heading")
   panel.TitleText:SetText("QueueUp")
   panel.TitleText:SetTextColor(0.92, 0.95, 1)
   panel.TitleText:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -10)
@@ -138,12 +141,14 @@ local function EnsurePanel()
   tabLFG:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -36)
   tabLFG:SetText("LFG Tools")
   SkinUIButton(tabLFG, "elevated")
+  SetUIButtonText(tabLFG, "LFG Tools")
 
   local tabUtility = CreateFrame("Button", nil, panel, "BackdropTemplate")
   tabUtility:SetSize(72, 22)
   tabUtility:SetPoint("LEFT", tabLFG, "RIGHT", 6, 0)
   tabUtility:SetText("Utility")
   SkinUIButton(tabUtility, "elevated")
+  SetUIButtonText(tabUtility, "Utility")
 
   SafeCall(BuildLFGTab, panel)
   SafeCall(BuildUtilityTab, panel)
@@ -186,6 +191,7 @@ local function EnsurePanel()
   side:Hide()
   ApplyUIFrame(side, "window", 1)
   side.TitleText = side:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+  SkinUIFont(side.TitleText, "heading")
   side.TitleText:SetText("Group Overview")
   side.TitleText:SetTextColor(0.92, 0.95, 1)
   side.TitleText:SetPoint("TOPLEFT", side, "TOPLEFT", 12, -10)
@@ -200,6 +206,7 @@ local function EnsurePanel()
   recheckBtn:SetPoint("TOPRIGHT", side, "TOPRIGHT", -10, -36)
   recheckBtn:SetText("Re-check")
   SkinUIButton(recheckBtn, "elevated")
+  SetUIButtonText(recheckBtn, "Re-check")
   recheckBtn:SetScript("OnClick", function()
     if priv.data.ClearGroupOverviewCache then
       priv.data.ClearGroupOverviewCache()
@@ -306,6 +313,7 @@ local function CreateLauncherButton(parent, name, tooltipText)
   button:SetIgnoreParentScale(true)
   button:SetText("QueueUp")
   SkinUIButton(button, "elevated")
+  SetUIButtonText(button, "QueueUp")
 
   button:SetScript("OnClick", TogglePanel)
   button:SetScript("OnEnter", function(self)
