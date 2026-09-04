@@ -109,7 +109,7 @@ const.UI = {
     -- Keep every QueueUp label on one face.  If an installed media addon has
     -- Accidental Presidency registered, ResolvePreferredFont() below swaps
     -- this fallback for that file automatically.
-    primary = "Fonts\\ARIALN.TTF",
+    primary = "Fonts\\FRIZQT__.TTF",
   },
   fontStrings = {},
   colors = {
@@ -128,7 +128,7 @@ const.UI = {
 }
 
 local function ResolvePreferredFont()
-  local fallback = "Fonts\\ARIALN.TTF"
+  local fallback = "Fonts\\FRIZQT__.TTF"
   local libStub = rawget(_G, "LibStub")
   if libStub then
     local ok, media = pcall(libStub, "LibSharedMedia-3.0", true)
