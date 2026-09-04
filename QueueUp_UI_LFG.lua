@@ -9,6 +9,7 @@ local Print = util.Print
 local SafeCall = util.SafeCall
 local GetRatingColor = util.GetRatingColor
 local CreateUIFont = util.CreateUIFont
+local SkinUICheckButton = util.SkinUICheckButton
 
 local PANEL_WIDTH = const.PANEL_WIDTH
 local ROLE_ORDER = const.ROLE_ORDER
@@ -144,7 +145,7 @@ local function CreateDataRow(parent, index, layout)
 
   row.name = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
   row.name:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.name, 0)
-  row.name:SetWidth(220)
+  row.name:SetWidth(math.max(120, UI_COLUMNS.fit - UI_COLUMNS.name - 12))
   row.name:SetJustifyH("LEFT")
 
   row.fitSquares = {}
@@ -196,18 +197,18 @@ local function CreateDataRow(parent, index, layout)
     icon:Hide()
     row.roleIcons[iconIndex] = icon
   end
-  row.roleIcons[1]:SetPoint("LEFT", row, "LEFT", 510, 0)
+  row.roleIcons[1]:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.role, 0)
   row.roleIcons[2]:SetPoint("CENTER", row.role, "CENTER", 0, 0)
   row.roleIcons[3]:SetPoint("CENTER", row.role, "CENTER", 18, 0)
 
   row.specIcon = row:CreateTexture(nil, "ARTWORK")
   row.specIcon:SetSize(16, 16)
-  row.specIcon:SetPoint("LEFT", row, "LEFT", 530, 0)
+  row.specIcon:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.role + 20, 0)
   row.specIcon:Hide()
 
   row.specText = CreateUIFont(row, "OVERLAY", "GameFontHighlightSmall", "body")
-  row.specText:SetPoint("LEFT", row, "LEFT", 550, 0)
-  row.specText:SetWidth(156)
+  row.specText:SetPoint("LEFT", row, "LEFT", UI_COLUMNS.role + 40, 0)
+  row.specText:SetWidth(math.max(80, UI_COLUMNS.actions - (UI_COLUMNS.role + 40)))
   row.specText:SetJustifyH("LEFT")
   row.specText:SetText("")
 
@@ -396,10 +397,10 @@ function UI.RefreshApplicants()
 
   if not isListed then
     if addon.applicantCountText then
-      addon.applicantCountText:SetText("Applicants: N/A")
+      addon.applicantCountText:SetText("")
     end
     if addon.listingContextText then
-      addon.listingContextText:SetText("Not currently listed!")
+      addon.listingContextText:SetText("No listing active")
     end
     if addon.applicantDeserterText then
       addon.applicantDeserterText:SetText("Applicant deserter: --")
@@ -487,6 +488,7 @@ function UI.RefreshApplicants()
       widget:Show()
       widget.name:ClearAllPoints()
       widget.name:SetPoint("LEFT", widget, "LEFT", 12 + indent, 0)
+      widget.name:SetWidth(math.max(120, UI_COLUMNS.fit - UI_COLUMNS.name - 12 - indent))
       widget.name:SetText(tostring(data.name or "-"))
 
       local classColor = RAID_CLASS_COLORS and RAID_CLASS_COLORS[data.classFile or ""]
@@ -562,7 +564,8 @@ function UI.RefreshApplicants()
       for idx = 1, #widget.roleIcons do
         local icon = widget.roleIcons[idx]
         if icon and idx == 1 and primaryRole then
-          icon:SetPoint("CENTER", widget.role, "CENTER", 0, 0)
+          icon:ClearAllPoints()
+          icon:SetPoint("LEFT", widget, "LEFT", UI_COLUMNS.role, 0)
           icon:SetTexture("Interface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES")
           if GetTexCoordsForRole then
             icon:SetTexCoord(GetTexCoordsForRole(primaryRole))
@@ -576,6 +579,11 @@ function UI.RefreshApplicants()
       end
 
       local specIcon = priv.rules.GetSpecIconForRow(data)
+      widget.specIcon:ClearAllPoints()
+      widget.specIcon:SetPoint("LEFT", widget, "LEFT", UI_COLUMNS.role + 20, 0)
+      widget.specText:ClearAllPoints()
+      widget.specText:SetPoint("LEFT", widget, "LEFT", UI_COLUMNS.role + 40, 0)
+      widget.specText:SetWidth(math.max(80, UI_COLUMNS.actions - (UI_COLUMNS.role + 40)))
       if specIcon then
         widget.specIcon:SetTexture(specIcon)
         widget.specIcon:SetDesaturated(false)
@@ -685,16 +693,12 @@ function UI.RefreshApplicants()
           local specText = (data.spec and data.spec ~= "") and data.spec or "-"
           GameTooltip:AddLine("Role: " .. table.concat(rolesText, " + "), 1, 1, 1)
           GameTooltip:AddLine("Class - Spec: " .. classText .. " - " .. specText, 1, 1, 1)
-          GameTooltip:AddLine("Score: " .. tostring(data.score), 1, 1, 1)
           if data.highestCompletion then
             GameTooltip:AddLine("Highest completion: +" .. tostring(data.highestCompletion), 0.7, 0.85, 1)
           end
           if data.raidProgressText and data.raidProgressText ~= "" then
             GameTooltip:AddLine("Raid progress: " .. tostring(data.raidProgressText), 0.7, 0.85, 1, true)
           end
-        end
-        if data.fitBreakdown and data.fitBreakdown ~= "" then
-          GameTooltip:AddLine(data.fitBreakdown, 0.78, 0.9, 1, true)
         end
         GameTooltip:Show()
       end)
@@ -756,22 +760,19 @@ function UI.RefreshApplicants()
     end
   end
 
-  if addon.applicantCountText then
-    addon.applicantCountText:SetText("Applicants: " .. tostring(#leaders))
-  end
   if addon.listingContextText then
-    local kind = "Other"
-    if priv.data.GetActiveListingKind then
-      local rawKind = priv.data.GetActiveListingKind()
-      if rawKind == "dungeon" then
-        kind = "Dungeon"
-      elseif rawKind == "raid" then
-        kind = "Raid"
-      elseif rawKind == "none" then
-        kind = "Not Listed"
-      end
+    local details = nil
+    if priv.data.GetActiveListingDetails then
+      details = SafeCall(priv.data.GetActiveListingDetails)
     end
-    addon.listingContextText:SetText("Listing (" .. kind .. "): " .. priv.data.GetActiveListingContext())
+    local listingName = details and details.name or (isRaidListing and "Raid" or (listingKind == "dungeon" and "Mythic+" or "Activity"))
+    local listingTitle = details and details.title or "Active queue"
+    addon.listingContextText:SetText(string.format(
+      "Active listing: %s - %s | Applicants: %d",
+      tostring(listingName),
+      tostring(listingTitle),
+      #leaders
+    ))
   end
   if addon.applicantDeserterText then
     local count = 0
@@ -898,17 +899,10 @@ local function BuildLFGTab(parent)
 
   tab.applicantCount = CreateUIFont(topBar, "OVERLAY", "GameFontHighlight", "body")
   tab.applicantCount:SetPoint("RIGHT", applicantDeserter, "LEFT", -10, 0)
-  tab.applicantCount:SetText("Applicants: 0")
+  tab.applicantCount:SetText("")
   tab.applicantCount:SetTextColor(0.98, 0.86, 0.4)
   addon.applicantCountText = tab.applicantCount
-
-  local listingContext = CreateUIFont(topBar, "OVERLAY", "GameFontHighlightSmall", "body")
-  listingContext:SetPoint("RIGHT", tab.applicantCount, "LEFT", -18, 0)
-  listingContext:SetWidth(260)
-  listingContext:SetJustifyH("RIGHT")
-  listingContext:SetText("Listing: Not currently listed")
-  listingContext:SetTextColor(0.8, 0.9, 1)
-  addon.listingContextText = listingContext
+  tab.applicantCount:Hide()
 
   local listPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   listPanel:SetPoint("TOPLEFT", topBar, "BOTTOMLEFT", 0, -6)
@@ -989,7 +983,7 @@ local function BuildLFGTab(parent)
   local rulesPanel = CreateFrame("Frame", nil, tab, "BackdropTemplate")
   rulesPanel:SetPoint("TOPLEFT", listPanel, "BOTTOMLEFT", 0, -10)
   rulesPanel:SetPoint("TOPRIGHT", listPanel, "BOTTOMRIGHT", 0, -10)
-  rulesPanel:SetHeight(150)
+  rulesPanel:SetHeight(126)
   util.ApplyUIFrame(rulesPanel, "surface", 1)
 
   local scoringPane = CreateFrame("Frame", nil, rulesPanel)
@@ -1014,20 +1008,14 @@ local function BuildLFGTab(parent)
     end)
   end
 
-  local rulesHelp = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
-  rulesHelp:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -2)
-  rulesHelp:SetWidth(800)
-  rulesHelp:SetJustifyH("LEFT")
-  rulesHelp:SetText("How applicants are scored and sorted. Enable the checks you care about, then set role and minimum thresholds.")
-  rulesHelp:SetTextColor(0.78, 0.78, 0.78)
-
   local ratingLabel = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
-  ratingLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -26)
+  ratingLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -4)
   ratingLabel:SetText("Min rating")
 
-  local ratingBox = CreateFrame("EditBox", nil, scoringPane, "InputBoxTemplate")
+  local ratingBox = CreateFrame("EditBox", nil, scoringPane, "BackdropTemplate")
   ratingBox:SetSize(56, 22)
   util.SkinUIEditBox(ratingBox)
+  ratingBox:SetTextInsets(6, 6, 0, 0)
   ratingBox:SetPoint("LEFT", ratingLabel, "RIGHT", 8, 0)
   ratingBox:SetAutoFocus(false)
   ratingBox:SetNumeric(true)
@@ -1043,9 +1031,10 @@ local function BuildLFGTab(parent)
   ilvlLabel:SetPoint("LEFT", ratingBox, "RIGHT", 12, 0)
   ilvlLabel:SetText("Min ilvl")
 
-  local ilvlBox = CreateFrame("EditBox", nil, scoringPane, "InputBoxTemplate")
+  local ilvlBox = CreateFrame("EditBox", nil, scoringPane, "BackdropTemplate")
   ilvlBox:SetSize(56, 22)
   util.SkinUIEditBox(ilvlBox)
+  ilvlBox:SetTextInsets(6, 6, 0, 0)
   ilvlBox:SetPoint("LEFT", ilvlLabel, "RIGHT", 8, 0)
   ilvlBox:SetAutoFocus(false)
   ilvlBox:SetNumeric(true)
@@ -1081,7 +1070,8 @@ local function BuildLFGTab(parent)
 
   local roleCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   roleCheck:SetSize(18, 18)
-  roleCheck:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -54)
+  SkinUICheckButton(roleCheck)
+  roleCheck:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -34)
   AttachCheckLabel(scoringPane, roleCheck, "Role contributes to score?")
   roleCheck:SetChecked(state.DB.rules.enableFlags.useRole)
   roleCheck:SetScript("OnClick", function(self)
@@ -1092,6 +1082,7 @@ local function BuildLFGTab(parent)
 
   local ratingCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   ratingCheck:SetSize(18, 18)
+  SkinUICheckButton(ratingCheck)
   ratingCheck:SetPoint("LEFT", roleCheck, "RIGHT", 150, 0)
   AttachCheckLabel(scoringPane, ratingCheck, "Rating contributes to score?")
   ratingCheck:SetChecked(state.DB.rules.enableFlags.useRating)
@@ -1103,6 +1094,7 @@ local function BuildLFGTab(parent)
 
   local ilvlCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   ilvlCheck:SetSize(18, 18)
+  SkinUICheckButton(ilvlCheck)
   ilvlCheck:SetPoint("LEFT", ratingCheck, "RIGHT", 150, 0)
   AttachCheckLabel(scoringPane, ilvlCheck, "Item level contributes to score?")
   ilvlCheck:SetChecked(state.DB.rules.enableFlags.useIlvl)
@@ -1113,11 +1105,12 @@ local function BuildLFGTab(parent)
   AttachTooltip(ilvlCheck, "Use Item Level", "When enabled, the players item level contributes to score.")
 
   local needRolesLabel = CreateUIFont(scoringPane, "OVERLAY", "GameFontHighlightSmall", "body")
-  needRolesLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -96)
+  needRolesLabel:SetPoint("TOPLEFT", scoringPane, "TOPLEFT", 4, -70)
   needRolesLabel:SetText("Needed roles:")
 
   local needTankCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   needTankCheck:SetSize(18, 18)
+  SkinUICheckButton(needTankCheck)
   needTankCheck:SetPoint("TOPLEFT", needRolesLabel, "BOTTOMLEFT", 0, -2)
   AttachCheckLabel(scoringPane, needTankCheck, "Tank")
   needTankCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.TANK) and true or false)
@@ -1130,6 +1123,7 @@ local function BuildLFGTab(parent)
 
   local needHealerCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   needHealerCheck:SetSize(18, 18)
+  SkinUICheckButton(needHealerCheck)
   needHealerCheck:SetPoint("LEFT", needTankCheck, "RIGHT", 100, 0)
   AttachCheckLabel(scoringPane, needHealerCheck, "Healer")
   needHealerCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.HEALER) and true or false)
@@ -1142,6 +1136,7 @@ local function BuildLFGTab(parent)
 
   local needDamageCheck = CreateFrame("CheckButton", nil, scoringPane, "UICheckButtonTemplate")
   needDamageCheck:SetSize(18, 18)
+  SkinUICheckButton(needDamageCheck)
   needDamageCheck:SetPoint("LEFT", needHealerCheck, "RIGHT", 100, 0)
   AttachCheckLabel(scoringPane, needDamageCheck, "Damage")
   needDamageCheck:SetChecked((state.DB.rules.neededRoles and state.DB.rules.neededRoles.DAMAGER) and true or false)

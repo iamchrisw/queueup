@@ -145,11 +145,11 @@ end
 const.UI.fonts.primary = ResolvePreferredFont()
 const.UI_COLUMNS = {
   name = 12,
-  fit = 260,
-  rating = 336,
-  best = 404,
-  ilvl = 452,
-  role = 508,
+  fit = 230,
+  rating = 330,
+  best = 408,
+  ilvl = 474,
+  role = 542,
   actions = 788,
 }
 
@@ -255,12 +255,36 @@ local function SkinUIEditBox(box)
   end
 end
 
+local function SkinUICheckButton(check)
+  if not check then return end
+  ApplyUIFrame(check, "elevated", 1)
+
+  local normal = check.GetNormalTexture and check:GetNormalTexture()
+  if normal then normal:SetAlpha(0) end
+  local pushed = check.GetPushedTexture and check:GetPushedTexture()
+  if pushed then pushed:SetAlpha(0) end
+  local highlight = check.GetHighlightTexture and check:GetHighlightTexture()
+  if highlight then highlight:SetAlpha(0) end
+
+  local checked = check.GetCheckedTexture and check:GetCheckedTexture()
+  if checked then
+    checked:ClearAllPoints()
+    checked:SetPoint("CENTER", check, "CENTER", 0, 0)
+    checked:SetSize(14, 14)
+    local c = const.UI.colors.accent
+    if checked.SetVertexColor then
+      checked:SetVertexColor(c[1], c[2], c[3], 1)
+    end
+  end
+end
+
 util.ApplyUIFrame = ApplyUIFrame
 util.SkinUIButton = SkinUIButton
 util.SetUIButtonText = SetUIButtonText
 util.SkinUIFont = SkinUIFont
 util.CreateUIFont = CreateUIFont
 util.SkinUIEditBox = SkinUIEditBox
+util.SkinUICheckButton = SkinUICheckButton
 
 local function RefreshUIFont()
   local preferred = ResolvePreferredFont()

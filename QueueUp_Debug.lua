@@ -10,6 +10,7 @@ local debugMod = priv.debug
 
 debugMod.enabled = debugMod.enabled or false
 debugMod.nextApplicantID = debugMod.nextApplicantID or 900000
+debugMod.nextGroupIndex = debugMod.nextGroupIndex or 1
 debugMod.fakeRows = debugMod.fakeRows or {}
 debugMod.simulatedListingKind = debugMod.simulatedListingKind or nil
 debugMod.running = debugMod.running or false
@@ -48,13 +49,13 @@ local function BuildRoleMask(role)
   }
 end
 
-local function MakeFakeRow(seedIndex)
+local function MakeFakeRow(seedIndex, applicantID, groupRootID, memberIndex, groupSize, isGroupMember)
   local classInfo = Pick(CLASS_POOL, seedIndex) or CLASS_POOL[1]
   local base = Pick(NAME_POOL, seedIndex) or "Test"
-  local applicantID = debugMod.nextApplicantID
-  debugMod.nextApplicantID = debugMod.nextApplicantID + 1
-
-  local name = string.format("%s-%s", base, "Debug")
+  local name = base
+  if isGroupMember then
+    name = string.format("%s-%d", base, memberIndex)
+  end
   -- Keep the synthetic population plausible: higher item level should usually
   -- correlate with higher rating, while still leaving room for outliers.
   local ilvl = 250 + ((seedIndex * 37) % 71) -- 250-320 inclusive
@@ -72,7 +73,7 @@ local function MakeFakeRow(seedIndex)
 
   return {
     applicantID = applicantID,
-    memberIndex = 1,
+    memberIndex = memberIndex or 1,
     name = name,
     playerKey = name,
     classLocalized = classInfo.label,
@@ -82,20 +83,47 @@ local function MakeFakeRow(seedIndex)
     roles = BuildRoleMask(classInfo.role),
     ilvl = ilvl,
     rating = rating,
-    numMembers = 1,
+    numMembers = groupSize or 1,
     applicantStatus = "applied",
     pendingStatus = "",
     isInvited = false,
     note = "",
-    applicationNote = "QueueUp debug applicant",
+    applicationNote = "",
     highestCompletion = best,
-    groupRootID = tostring(applicantID),
+    groupRootID = tostring(groupRootID or applicantID),
     hasDeserter = (seedIndex % 9 == 0),
-    isGroupLeader = false,
-    isGroupMember = false,
+    isGroupLeader = not isGroupMember and (groupSize or 1) > 1,
+    isGroupMember = isGroupMember == true,
     isFake = true,
     raidProgressText = raidProgress,
   }
+end
+
+local function MakeFakeGroup(seedIndex)
+  -- The debug stream represents applications, not individual characters.
+  -- Roughly half of the applications are groups so the real grouped-row
+  -- rendering path is exercised during a simulation.
+  local groupSize = 1
+  if seedIndex % 4 == 0 then
+    groupSize = 3
+  elseif seedIndex % 2 == 0 then
+    groupSize = 2
+  end
+
+  local applicantID = debugMod.nextApplicantID
+  debugMod.nextApplicantID = debugMod.nextApplicantID + 1
+  local rows = {}
+  for memberIndex = 1, groupSize do
+    rows[#rows + 1] = MakeFakeRow(
+      seedIndex + memberIndex - 1,
+      applicantID,
+      applicantID,
+      memberIndex,
+      groupSize,
+      memberIndex > 1
+    )
+  end
+  return rows
 end
 
 function debugMod.SetEnabled(enabled)
@@ -112,6 +140,7 @@ function debugMod.Stop()
   debugMod.enabled = false
   debugMod.simulatedListingKind = nil
   debugMod.fakeRows = {}
+  debugMod.nextGroupIndex = 1
   if addon.UI and addon.UI.RefreshApplicants then addon.UI.RefreshApplicants() end
   Print("debug simulation stopped")
 end
@@ -148,20 +177,31 @@ end
 
 function debugMod.Clear()
   debugMod.fakeRows = {}
+  debugMod.nextGroupIndex = 1
   Print("debug fake applicants cleared")
 end
 
 function debugMod.Add(count)
   count = math.max(1, math.min(50, tonumber(count) or 1))
-  local startIndex = #debugMod.fakeRows + 1
+  local startIndex = debugMod.nextGroupIndex or 1
   for i = 1, count do
-    debugMod.fakeRows[#debugMod.fakeRows + 1] = MakeFakeRow(startIndex + i - 1)
+    local fakeGroup = MakeFakeGroup(startIndex + i - 1)
+    for _, row in ipairs(fakeGroup) do
+      debugMod.fakeRows[#debugMod.fakeRows + 1] = row
+    end
   end
+  debugMod.nextGroupIndex = startIndex + count
   Print("added " .. tostring(count) .. " fake applicant(s)")
 end
 
 function debugMod.ListCount()
-  return #debugMod.fakeRows
+  local count = 0
+  for _, row in ipairs(debugMod.fakeRows) do
+    if not row.isGroupMember then
+      count = count + 1
+    end
+  end
+  return count
 end
 
 function debugMod.GetRows()

@@ -114,15 +114,16 @@ local function EnsurePanel()
   panel:Hide()
 
   ApplyUIFrame(panel, "window", 1)
-  panel.TitleText = CreateUIFont(panel, "OVERLAY", "GameFontNormalLarge", "heading")
-  panel.TitleText:SetText("QueueUp")
-  panel.TitleText:SetTextColor(0.92, 0.95, 1)
-  panel.TitleText:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -10)
-  local titleRule = panel:CreateTexture(nil, "ARTWORK")
-  titleRule:SetColorTexture(0.28, 0.70, 0.82, 0.85)
-  titleRule:SetPoint("TOPLEFT", panel, "TOPLEFT", 10, -30)
-  titleRule:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -10, -30)
-  titleRule:SetHeight(1)
+  -- The former QueueUp title area is now the single listing status banner.
+  -- Keeping it in the bootstrap panel lets the LFG tab update it without
+  -- creating a second, smaller status label in the tab's top bar.
+  local listingBanner = CreateUIFont(panel, "OVERLAY", "GameFontNormalLarge", "heading")
+  listingBanner:SetPoint("TOPLEFT", panel, "TOPLEFT", 12, -10)
+  listingBanner:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -48, -10)
+  listingBanner:SetJustifyH("LEFT")
+  listingBanner:SetText("No listing active")
+  listingBanner:SetTextColor(0.92, 0.95, 1)
+  addon.listingContextText = listingBanner
 
   local close = CreateFrame("Button", nil, panel, "BackdropTemplate")
   close:SetSize(22, 22)

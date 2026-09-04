@@ -124,6 +124,45 @@ local function GetActiveListingContext()
   return "Not currently listed"
 end
 
+local function GetActiveListingDetails()
+  local debugMod = priv.debug
+  if debugMod and type(debugMod.GetListingKind) == "function" then
+    local simulatedKind = debugMod.GetListingKind()
+    if simulatedKind == "dungeon" then
+      return { name = "Mythic+", title = "Simulation" }
+    elseif simulatedKind == "raid" then
+      return { name = "Raid", title = "Simulation" }
+    end
+  end
+
+  if not C_LFGList or type(C_LFGList.GetActiveEntryInfo) ~= "function" then
+    return nil
+  end
+
+  local info = SafeCall(C_LFGList.GetActiveEntryInfo)
+  if type(info) ~= "table" then
+    return nil
+  end
+
+  local dungeonContext = GetActiveListingDungeonContext()
+  local activityName = tostring(dungeonContext.name or ""):gsub("^%s+", ""):gsub("%s+$", "")
+  local title = tostring(info.title or ""):gsub("^%s+", ""):gsub("%s+$", "")
+  if title == "" then
+    title = tostring(info.name or ""):gsub("^%s+", ""):gsub("%s+$", "")
+  end
+  if activityName == "" then
+    activityName = title
+  end
+  if activityName == "" and title == "" then
+    return nil
+  end
+
+  return {
+    name = activityName ~= "" and activityName or "Activity",
+    title = title ~= "" and title or "Untitled listing",
+  }
+end
+
 local function DetectListingKindFromText(text)
   text = string.lower(tostring(text or ""))
   if text == "" then
@@ -2191,6 +2230,7 @@ function ApplicantData.GetApplicants()
 end
 
 priv.data.GetActiveListingContext = GetActiveListingContext
+priv.data.GetActiveListingDetails = GetActiveListingDetails
 priv.data.GetActiveListingKind = GetActiveListingKind
 priv.data.GetGroupOverviewRows = BuildGroupOverviewRows
 priv.data.ClearGroupOverviewCache = ClearGroupOverviewCache
