@@ -130,7 +130,7 @@ const.UI = {
 local function ResolvePreferredFont()
   local fallback = "Fonts\\ARIALN.TTF"
   local libStub = rawget(_G, "LibStub")
-  if type(libStub) == "function" then
+  if libStub then
     local ok, media = pcall(libStub, "LibSharedMedia-3.0", true)
     if ok and media and type(media.Fetch) == "function" then
       local fetchedOK, fetched = pcall(media.Fetch, media, "font", "Accidental Presidency", true)
